@@ -4,9 +4,9 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
-from sklearn.linear_model import LogisticRegression
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+import joblib
 
 # Load the dataset
 df = pd.read_csv("diabetes.csv")
@@ -24,7 +24,7 @@ plt.title("Feature Correlation Heatmap")
 plt.show()
 
 # Split data into features (X) and target (y)
-X = df.drop("Outcome", axis=1)
+X = df.drop("Outcome", axis=1)  # Keep all 8 features
 y = df["Outcome"]
 
 # Train-test split (80% train, 20% test)
@@ -35,35 +35,27 @@ scaler = StandardScaler()
 X_train = scaler.fit_transform(X_train)
 X_test = scaler.transform(X_test)
 
-# Train Logistic Regression Model
-log_model = LogisticRegression()
-log_model.fit(X_train, y_train)
-
-# Train Random Forest Model
-rf_model = RandomForestClassifier(n_estimators=100, random_state=42)
-rf_model.fit(X_train, y_train)
+# Train SVM Model
+svm_model = SVC(kernel='rbf', random_state=42)  # Using RBF kernel for SVM
+svm_model.fit(X_train, y_train)
 
 # Predictions
-log_pred = log_model.predict(X_test)
-rf_pred = rf_model.predict(X_test)
+svm_pred = svm_model.predict(X_test)
 
-# Accuracy Scores
-log_accuracy = accuracy_score(y_test, log_pred)
-rf_accuracy = accuracy_score(y_test, rf_pred)
+# Accuracy Score
+svm_accuracy = accuracy_score(y_test, svm_pred)
 
-print("\nLogistic Regression Accuracy:", round(log_accuracy * 100, 2), "%")
-print("Random Forest Accuracy:", round(rf_accuracy * 100, 2), "%")
+print("\nSVM Accuracy:", round(svm_accuracy * 100, 2), "%")
 
-# Confusion Matrix & Classification Report for Random Forest (Better Model)
-print("\nConfusion Matrix:")
-print(confusion_matrix(y_test, rf_pred))
+# Confusion Matrix & Classification Report for SVM
+print("\nConfusion Matrix for SVM:")
+print(confusion_matrix(y_test, svm_pred))
 
-print("\nClassification Report:")
-print(classification_report(y_test, rf_pred))
+print("\nClassification Report for SVM:")
+print(classification_report(y_test, svm_pred))
 
-# Save the best model (Random Forest) using joblib
-import joblib
-joblib.dump(rf_model, "diabetes_model.pkl")
+# Save the best model (SVM) using joblib
+joblib.dump(svm_model, "diabetes_svm_model.pkl")
 joblib.dump(scaler, "scaler.pkl")
 
-print("\nModel saved as 'diabetes_model.pkl' and 'scaler.pkl'")
+print("\nSVM Model saved as 'diabetes_svm_model.pkl' and scaler as 'scaler.pkl'")
